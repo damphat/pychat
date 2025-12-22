@@ -1,0 +1,18 @@
+[
+    {
+        "role": "user",
+        "content": "Tôi là Phát, bạn là ai?"
+    },
+    {
+        "role": "assistant",
+        "content": "Chào Phát! Tôi là trợ lý AI, luôn sẵn sàng giúp đỡ bạn."
+    },
+    {
+        "role": "user",
+        "content": "Kể chuyện cười ngắn dùng tên của tôi nhé!"
+    },
+    {
+        "role": "assistant",
+        "content": "Tại sao Phát luôn mang theo bút chì khi gặp bạn bè? \n\nVì Phát không muốn để lại dấu vết mực vĩnh viễn khi ghi lại những phút giây vui vẻ!"
+    }
+]
