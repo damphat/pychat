@@ -1,89 +1,37 @@
 import os
-import json
-import uuid
 from openai import OpenAI
-from typing import List, Dict, Any, Optional
-
-# Constants
-DATA_DIR = "data"
-SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
-CONFIG_FILE = os.path.join(DATA_DIR, "config.json")
-
-def load_config() -> Dict[str, Any]:
-    """Loads the configuration file."""
-    default_config = {
-        "system": "You are a helpful assistant.",
-        "model": "gpt-4o",
-        "last_session_id": None
-    }
-    if not os.path.exists(CONFIG_FILE):
-        return default_config
-    with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-        config = json.load(f)
-        # Ensure default keys exist
-        for key, value in default_config.items():
-            if key not in config:
-                config[key] = value
-        return config
-
-def save_config(config: Dict[str, Any]):
-    """Saves the configuration file."""
-    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-        json.dump(config, f, indent=4, ensure_ascii=False)
-
-def get_session_file(session_id: str) -> str:
-    return os.path.join(SESSIONS_DIR, f"chat-{session_id}.json")
-
-def load_session(session_id: str) -> List[Dict[str, str]]:
-    """Loads chat history for a given session ID."""
-    session_file = get_session_file(session_id)
-    if os.path.exists(session_file):
-        with open(session_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return []
-
-def save_session(session_id: str, messages: List[Dict[str, str]]):
-    """Saves chat history for a session."""
-    session_file = get_session_file(session_id)
-    with open(session_file, 'w', encoding='utf-8') as f:
-        json.dump(messages, f, indent=4, ensure_ascii=False)
+from chat_config import ChatConfig
+from data_session import Session
 
 def clear_screen():
     """Clears the terminal screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def create_new_session(config: Dict[str, Any]) -> tuple[str, List[Dict[str, str]]]:
-    """Creates a new session ID and updates config."""
+def create_new_session(config: ChatConfig) -> Session:
+    """Creates a new Session and updates config."""
     clear_screen()
-    session_id = str(uuid.uuid4())
-    config["last_session_id"] = session_id
-    save_config(config)
-    save_session(session_id, [])
-    print(f"Started new session: {session_id}")
-    return session_id, []
+    session = Session.create_new()
+    config.last_session_id = session.session_id
+    config.save()
+    session.save()
+    print(f"Started new session: {session.session_id}")
+    return session
 
 def main():
-    # Ensure data directories exist
-    os.makedirs(SESSIONS_DIR, exist_ok=True)
-
     client = OpenAI()
-    config = load_config()
-    system_prompt = config.get("system", "You are a helpful assistant.")
-    
-    current_session_id = config.get("last_session_id")
+    config = ChatConfig.load()
     
     # Initialize session
-    messages: List[Dict[str, str]] = []
-    if current_session_id:
-        messages = load_session(current_session_id)
-        if not messages and not os.path.exists(get_session_file(current_session_id)):
-             # invalid session id or file missing, treat as new
-             pass
+    session: Session
+    if config.last_session_id:
+        session = Session.load(config.last_session_id)
+        if not session.messages and not os.path.exists(os.path.join("data", "sessions", f"chat-{config.last_session_id}.json")):
+            # invalid session id or file missing, treat as new
+            session = create_new_session(config)
         else:
-            print(f"Resuming session: {current_session_id}")
-    
-    if not current_session_id or (current_session_id and not messages and not os.path.exists(get_session_file(current_session_id))):
-        current_session_id, messages = create_new_session(config)
+            print(f"Resuming session: {session.session_id}")
+    else:
+        session = create_new_session(config)
 
     print("Type 'new' to start a new session. Press Ctrl+C to exit.")
 
@@ -94,24 +42,21 @@ def main():
                 continue
 
             if user_input.lower() == "new":
-                current_session_id, messages = create_new_session(config)
+                session = create_new_session(config)
                 continue
 
             # Append user message
-            messages.append({"role": "user", "content": user_input})
-            save_session(current_session_id, messages)
+            session.add_message("user", user_input)
+            session.save()
 
-            # Prepare messages for API (include system prompt if not present in history, 
-            # though actually usually system prompt is separate or header)
-            # The requirement says "gửi kèm system prompt và chat history của session hiện tại"
-            
-            api_messages = [{"role": "system", "content": system_prompt}] + messages
+            # Prepare messages for API
+            api_messages = [{"role": "system", "content": config.system}] + session.messages
 
             print("AI: ", end="", flush=True)
             
             full_response = ""
             stream = client.chat.completions.create(
-                model=config.get("model", "gpt-4o"),
+                model=config.model,
                 messages=api_messages,
                 stream=True
             )
@@ -125,8 +70,8 @@ def main():
             print() # Newline after stream
 
             # Append assistant response
-            messages.append({"role": "assistant", "content": full_response})
-            save_session(current_session_id, messages)
+            session.add_message("assistant", full_response)
+            session.save()
 
         except KeyboardInterrupt:
             print("\nExiting...")
@@ -136,3 +81,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
