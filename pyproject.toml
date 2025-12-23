@@ -1,11 +1,34 @@
 [project]
 name = "pychat"
 version = "0.1.0"
-description = "Add your description here"
+description = "A flexible chat application supporting both CLI and Web interfaces."
 readme = "README.md"
 requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Dam Phat" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Communications :: Chat",
+]
 dependencies = [
     "gradio>=6.2.0",
     "openai>=2.14.0",
-    "pytest>=9.0.2",
 ]
+
+[project.scripts]
+pychat = "pychat.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pychat"]

@@ -10,14 +10,11 @@ Một project mini thử nghiệm vibe coding, tích hợp OpenAI API để chat
 
 ## Cài đặt
 
-Yêu cầu Python 3.12+.
+Yêu cầu Python 3.12+. Khuyến nghị sử dụng [uv](https://github.com/astral-sh/uv) để quản lý project.
 
 ```bash
-# Cài đặt bằng uv
+# Cài đặt dependencies
 uv sync
-
-# Hoặc bằng pip
-pip install -r pyproject.toml
 ```
 
 Thiết lập API Key:
@@ -27,24 +24,33 @@ export OPENAI_API_KEY='your-api-key'
 
 ## Cách dùng
 
+Project hỗ trợ chạy trực tiếp thông qua command `pychat` đã được định nghĩa trong `pyproject.toml`.
+
 ### Terminal (CLI)
+Chạy chế độ chat command-line mặc định:
 ```bash
-python main.py
+uv run pychat
 ```
-*Gõ `new` để tạo session mới.*
+*Gõ `new` để tạo session mới. Gõ Ctrl+C để thoát.*
 
 ### Web UI
+Chạy chế độ giao diện web (Gradio):
 ```bash
-python main_ui.py
+uv run pychat web
 ```
 
 ### Chạy Tests
 ```bash
-pytest
+uv run pytest
 ```
 
-## Cấu trúc file
-- `chat_app.py`: Logic xử lý chính và kết nối OpenAI.
-- `main.py` / `main_ui.py`: Entry point cho CLI và Web.
-- `chat_config.py` / `data_session.py`: Quản lý cấu hình và lưu trữ session.
+## Cấu trúc project
+Project sử dụng **src layout** tiêu chuẩn:
+
+- `src/pychat/`: Source code chính (logic, ui, cli).
+    - `__main__.py`: Entry point điều hướng CLI/Web.
+    - `chat_app.py`: Logic xử lý chính và kết nối OpenAI.
+    - `cli.py`: Giao diện dòng lệnh.
+    - `web.py`: Giao diện web Gradio.
 - `data/`: Chứa lịch sử chat và cấu hình JSON.
+- `pyproject.toml`: Quản lý dependencies và cấu hình project.
