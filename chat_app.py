@@ -58,6 +58,33 @@ class ChatApp:
         self.session.add_message("assistant", full_response)
         self.session.save()
 
+    def set_model(self, name: str):
+        """Set the model to `name` if OpenAI supports it, otherwise raise ValueError.
+
+        This method queries the OpenAI models list and accepts model entries that are
+        dicts with an 'id' key or objects with an 'id' attribute.
+        """
+        # Fetch list of models from OpenAI
+        models_resp = self.client.models.list()
+        # models_resp may be an iterable or have a .data attribute
+        models_iter = getattr(models_resp, 'data', models_resp)
+
+        supported = set()
+        for m in models_iter:
+            if isinstance(m, dict):
+                mid = m.get('id')
+            else:
+                mid = getattr(m, 'id', None) or getattr(m, 'model', None)
+            if mid:
+                supported.add(mid)
+
+        if name not in supported:
+            raise ValueError(f"Model '{name}' is not supported by OpenAI.")
+
+        # Persist the model in config
+        self.config.model = name
+        self.config.save()
+
     @property
     def messages(self):
         return self.session.messages

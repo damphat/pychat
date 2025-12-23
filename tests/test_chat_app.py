@@ -49,3 +49,23 @@ def test_chat_app_send_message(mock_save, mock_openai, mock_config):
     assert app.session.messages[0] == {"role": "user", "content": "Hi"}
     assert app.session.messages[1] == {"role": "assistant", "content": "Hello"}
     assert app.client.chat.completions.create.called
+
+
+def test_set_model_valid(mock_openai, mock_config):
+    app = ChatApp()
+
+    # Prepare models returned by OpenAI
+    app.client.models.list.return_value = MagicMock(data=[{"id": "gpt-5-nano"}, {"id": "gpt-4"}])
+
+    with patch.object(ChatConfig, 'save') as mock_save:
+        app.set_model("gpt-4")
+        assert app.config.model == "gpt-4"
+        mock_save.assert_called_once()
+
+
+def test_set_model_invalid(mock_openai, mock_config):
+    app = ChatApp()
+    app.client.models.list.return_value = MagicMock(data=[{"id": "gpt-5-nano"}])
+
+    with pytest.raises(ValueError):
+        app.set_model("gpt-4")
