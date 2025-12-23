@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
-from chat_config import ChatConfig
-from data_session import Session, SESSIONS_DIR
+from .chat_config import ChatConfig
+from .data_session import Session, SESSIONS_DIR
 
 class ChatApp:
     def __init__(self):

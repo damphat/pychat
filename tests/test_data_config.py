@@ -1,7 +1,7 @@
 import os
 import json
 import pytest
-from chat_config import ChatConfig
+from pychat.chat_config import ChatConfig
 
 TEST_CONFIG_PATH = "data/test_config.json"
 

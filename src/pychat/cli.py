@@ -1,6 +1,6 @@
 import os
 import sys
-from chat_app import ChatApp
+from .chat_app import ChatApp
 
 def clear_screen():
     """Clears the terminal screen."""

@@ -1,7 +1,7 @@
 import os
 import json
 import pytest
-from data_session import Session
+from pychat.data_session import Session
 
 TEST_SESSIONS_DIR = "data/test_sessions"
 

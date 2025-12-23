@@ -1,17 +1,17 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from chat_app import ChatApp
-from data_session import Session
-from chat_config import ChatConfig
+from pychat.chat_app import ChatApp
+from pychat.data_session import Session
+from pychat.chat_config import ChatConfig
 
 @pytest.fixture
 def mock_openai():
-    with patch('chat_app.OpenAI') as mock:
+    with patch('pychat.chat_app.OpenAI') as mock:
         yield mock
 
 @pytest.fixture
 def mock_config():
-    with patch('chat_app.ChatConfig.load') as mock:
+    with patch('pychat.chat_app.ChatConfig.load') as mock:
         mock.return_value = ChatConfig(last_session_id=None)
         yield mock
 
@@ -30,7 +30,7 @@ def test_chat_app_new_session(mock_openai, mock_config):
     assert app.session == new_session
     assert app.config.last_session_id == new_session.session_id
 
-@patch('chat_app.Session.save')
+@patch('pychat.chat_app.Session.save')
 def test_chat_app_send_message(mock_save, mock_openai, mock_config):
     app = ChatApp()
     

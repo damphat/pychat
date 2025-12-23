@@ -1,7 +1,7 @@
 from gradio.components.chatbot import MessageDict, Message
 import asyncio
 import gradio as gr
-from chat_app import ChatApp
+from .chat_app import ChatApp
 
 def create_ui():
     app = ChatApp()
@@ -52,6 +52,9 @@ def create_ui():
 
     return demo
 
-if __name__ == "__main__":
+def main():
     demo = create_ui()
     demo.launch()
+
+if __name__ == "__main__":
+    main()
