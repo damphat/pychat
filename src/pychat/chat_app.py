@@ -45,7 +45,7 @@ class ChatApp:
             {"role": "system", "content": self.config.system}
         ]
         for msg in self.session.messages:
-            api_messages.append(msg)  # type: ignore
+            api_messages.append(msg)
 
         stream = self.client.chat.completions.create(
             model=self.config.model,

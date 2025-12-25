@@ -1,8 +1,11 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, TYPE_CHECKING, cast
 from dataclasses import dataclass, field
 import json
 import os
 import uuid
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionMessageParam
 
 DATA_DIR = "data"
 SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
@@ -10,7 +13,7 @@ SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
 @dataclass
 class Session:
     session_id: str
-    messages: List[Dict[str, Any]] = field(default_factory=list)
+    messages: List["ChatCompletionMessageParam"] = field(default_factory=list)
 
     @classmethod
     def create_new(cls) -> 'Session':
@@ -28,7 +31,7 @@ class Session:
                 messages = json.load(f)
                 if not isinstance(messages, list):
                     messages = []
-                return cls(session_id=session_id, messages=messages)
+                return cls(session_id=session_id, messages=cast(List["ChatCompletionMessageParam"], messages))
         except (json.JSONDecodeError, OSError):
             return cls(session_id=session_id)
 
@@ -41,4 +44,4 @@ class Session:
 
     def add_message(self, role: str, content: str):
         """Add a message to the session."""
-        self.messages.append({"role": role, "content": content})
+        self.messages.append(cast("ChatCompletionMessageParam", {"role": role, "content": content}))
