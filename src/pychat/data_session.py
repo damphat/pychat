@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, field
 import json
 import os
@@ -10,7 +10,7 @@ SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
 @dataclass
 class Session:
     session_id: str
-    messages: List[Dict[str, str]] = field(default_factory=list)
+    messages: List[Dict[str, Any]] = field(default_factory=list)
 
     @classmethod
     def create_new(cls) -> 'Session':

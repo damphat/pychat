@@ -1,5 +1,7 @@
 import os
+from typing import List, Any
 from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageParam
 from .chat_config import ChatConfig
 from .data_session import Session, SESSIONS_DIR
 
@@ -39,7 +41,11 @@ class ChatApp:
         self.session.save()
 
         # Prepare messages for API
-        api_messages = [{"role": "system", "content": self.config.system}] + self.session.messages
+        api_messages: List[ChatCompletionMessageParam] = [
+            {"role": "system", "content": self.config.system}
+        ]
+        for msg in self.session.messages:
+            api_messages.append(msg)  # type: ignore
 
         stream = self.client.chat.completions.create(
             model=self.config.model,
